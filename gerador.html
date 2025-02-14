@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Assinaturas</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/qr-code-styling/lib/qr-code-styling.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <img src="RYAZBEK_logo.jpg" alt="Logo da Página">
+            <h1>Gerador de Assinaturas</h1>
+        </header>
+        <main class="main-content">
+            <div class="form-container">
+                <form id="signatureForm">
+                    <div class="input-group">
+                        <label for="name">Nome:</label>
+                        <input type="text" id="name" placeholder="Seu Nome" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="title">Cargo:</label>
+                        <input type="text" id="title" placeholder="Seu Cargo" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="email">E-mail:</label>
+                        <div class="email-group">
+                            <input type="text" id="email" placeholder="seu.nome" required>
+                            <span>@ryazbek.com.br</span>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="phone">Telefone:</label>
+                        <input type="tel" id="phone" placeholder="Seu Telefone" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="address">Endereço:</label>
+                        <input type="text" id="address" placeholder="Endereço da obra ou escritório" required>
+                    </div>
+                </form>
+            </div>
+
+            <div class="preview-container">
+                <div class="signature-preview" id="signature"></div>
+                <div id="qrcode"></div> <!-- QR Code aparece aqui -->
+                <button type="submit" id="generate">Enviar Assinatura</button>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

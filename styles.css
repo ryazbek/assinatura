@@ -1,0 +1,110 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #fff;
+}
+
+h1 {
+    color: #696969;
+}
+
+.container {
+    width: 80%;
+    max-width: 900px;
+    background-color: #f4f4f4;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+header img {
+    width: 150px;
+}
+
+.main-content {
+    display: flex;
+    justify-content: space-between;
+}
+
+.form-container {
+    width: 45%;
+}
+
+.preview-container {
+    width: 45%;
+    text-align: center;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.email-group {
+    display: flex;
+    align-items: center;
+}
+
+.email-group input {
+    flex: 1;
+}
+
+.email-group span {
+    background-color: #ddd;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-left: none;
+    border-radius: 0 4px 4px 0;
+}
+
+.signature-preview {
+    border: 1px solid #ccc;
+    padding: 15px;
+    background-color: #f9f9f9;
+    min-height: 100px;
+    text-align: left;
+}
+
+button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+#qrCodeCanvas {
+    margin-top: 15px;
+    width: 120px;
+    height: 120px;
+}
+
+#qrcode {
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+}
