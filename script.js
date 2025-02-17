@@ -82,8 +82,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
             })
             .catch(function (error) {
-                Swal.fire("Erro!", "Ocorreu um erro ao enviar a assinatura. Tente novamente.", "error");
                 console.error("Erro ao enviar e-mail:", error);
+                Swal.fire("Erro!", `Ocorreu um erro ao enviar a assinatura: ${error.text || "Erro desconhecido"}`, "error");
             });
     });
 });
