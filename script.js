@@ -51,23 +51,26 @@ document.addEventListener("DOMContentLoaded", function () {
     form.addEventListener("submit", function (event) {
         event.preventDefault(); // Evita o recarregamento da página
 
-        const nome = document.getElementById("nome").value;
-        const cargo = document.getElementById("cargo").value;
-        const email = document.getElementById("email").value + "@ryazbek.com.br";
-        const telefone = document.getElementById("telefone").value;
-        const endereco = document.getElementById("endereco").value;
+        const nome = document.getElementById("nome").value.trim();
+        const cargo = document.getElementById("cargo").value.trim();
+        const emailInput = document.getElementById("email").value.trim();
+        const telefone = document.getElementById("telefone").value.trim();
+        const endereco = document.getElementById("endereco").value.trim();
 
-        if (!nome || !cargo || !email || !telefone || !endereco) {
+        if (!nome || !cargo || !emailInput || !telefone || !endereco) {
             Swal.fire("Erro!", "Preencha todos os campos antes de enviar.", "error");
             return;
         }
 
+        const email = emailInput + "@ryazbek.com.br";
+        
         const templateParams = {
             nome_html: nome,
             cargo_html: cargo,
             user_html: email,
             tel_html: telefone,
-            address_html: endereco
+            address_html: endereco,
+            to_email: email // Adicionado para evitar erro de destinatário
         };
 
         emailjs.send("service_eegaehm", "template_cck7sxv", templateParams)
