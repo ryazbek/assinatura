@@ -5,7 +5,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const previewContainer = document.getElementById("signature");
     const qrContainer = document.getElementById("qrcode");
 
-    // Atualiza a prévia sempre que os campos mudam
     function updatePreview() {
         const nome = document.getElementById("nome").value || "Seu Nome";
         const cargo = document.getElementById("cargo").value || "Seu Cargo";
@@ -13,7 +12,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const telefone = document.getElementById("telefone").value || "Seu Telefone";
         const endereco = document.getElementById("endereco").value || "Endereço da obra ou escritório";
 
-        // Atualiza a prévia da assinatura
         previewContainer.innerHTML = `
             <strong style="color:#333;">${nome}</strong><br>
             <span style="color:#333;">${cargo}</span><br>
@@ -22,23 +20,20 @@ document.addEventListener("DOMContentLoaded", function () {
             <span style="color:#696969;">${endereco}</span>
         `;
 
-        // Atualiza o QR Code
         gerarQRCode({ nome, cargo, email, telefone, endereco });
     }
 
-    // Captura mudanças nos inputs para atualizar a prévia
     document.querySelectorAll("input").forEach(input => {
         input.addEventListener("input", updatePreview);
     });
 
-    // Função para gerar o QR Code
     function gerarQRCode(data) {
-        qrContainer.innerHTML = ""; // Limpa antes de gerar um novo
+        qrContainer.innerHTML = "";
 
         const qr = new QRCodeStyling({
             width: 150,
             height: 150,
-            data: `https://www.ryazbek.com.br/assinatura?nome=${encodeURIComponent(data.nome)}&cargo=${encodeURIComponent(data.cargo)}&email=${encodeURIComponent(data.email)}&telefone=${encodeURIComponent(data.telefone)}&endereco=${encodeURIComponent(data.endereco)}`,
+            data: `https://ryazbek.github.io/assinatura/qrcode/${encodeURIComponent(data.email)}`,
             image: "logo_y.png",
             dotsOptions: { color: "#696969", type: "square" },
             imageOptions: { crossOrigin: "anonymous", margin: 5 }
@@ -47,9 +42,42 @@ document.addEventListener("DOMContentLoaded", function () {
         qr.append(qrContainer);
     }
 
-    // Função de envio do e-mail
-    form.addEventListener("submit", function (event) {
-        event.preventDefault(); // Evita o recarregamento da página
+    async function atualizarJSONUsuario(usuario) {
+        const repo = "ryazbek/assinatura";
+        const path = "data/usuarios.json";
+        const token = "SEU_PERSONAL_ACCESS_TOKEN";
+        
+        try {
+            const response = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+                headers: { Authorization: `token ${token}` }
+            });
+
+            const data = await response.json();
+            const conteudoAtual = JSON.parse(atob(data.content));
+
+            conteudoAtual[usuario.email] = usuario;
+
+            const novoConteudo = btoa(JSON.stringify(conteudoAtual, null, 2));
+            
+            await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+                method: "PUT",
+                headers: {
+                    Authorization: `token ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    message: `Atualizando usuário ${usuario.email}`,
+                    content: novoConteudo,
+                    sha: data.sha
+                })
+            });
+        } catch (error) {
+            console.error("Erro ao atualizar JSON no GitHub:", error);
+        }
+    }
+
+    form.addEventListener("submit", async function (event) {
+        event.preventDefault();
 
         const nome = document.getElementById("nome").value.trim();
         const cargo = document.getElementById("cargo").value.trim();
@@ -63,28 +91,24 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         const email = emailInput + "@ryazbek.com.br";
-        
+        const usuario = { nome, cargo, email, telefone, endereco };
+
+        await atualizarJSONUsuario(usuario);
+
         const templateParams = {
             nome_html: nome,
             cargo_html: cargo,
             user_html: email,
             tel_html: telefone,
             address_html: endereco,
-            to_email: email // Adicionado para evitar erro de destinatário
+            to_email: email
         };
 
         emailjs.send("service_eegaehm", "template_cck7sxv", templateParams)
-            .then(function (response) {
-                Swal.fire({
-                    title: "Sucesso!",
-                    text: "A assinatura foi enviada com sucesso.",
-                    icon: "success",
-                    confirmButtonText: "OK"
-                }).then(() => {
-                    window.location.href = "obrigado.html"; // Redireciona após fechar o alerta
-                });
+            .then(() => {
+                window.location.href = "obrigado.html";
             })
-            .catch(function (error) {
+            .catch(error => {
                 console.error("Erro ao enviar e-mail:", error);
                 Swal.fire("Erro!", `Ocorreu um erro ao enviar a assinatura: ${error.text || "Erro desconhecido"}`, "error");
             });
