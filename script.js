@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
-    emailjs.init("cSoci5LgPAuAK5gcg"); // Substitua pelo seu User ID do EmailJS
+    emailjs.init("cSoci5LgPAuAK5gcg");
 
     const form = document.getElementById("signatureForm");
     const previewContainer = document.getElementById("signature");
@@ -29,18 +29,26 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function gerarQRCode(data) {
         qrContainer.innerHTML = "";
-
         const qr = new QRCodeStyling({
             width: 150,
             height: 150,
-            data: `https://ryazbek.github.io/assinatura/qrcode/${encodeURIComponent(data.email)}`,
+            data: `https://ryazbek.github.io/assinatura/qrcode.html?user=${encodeURIComponent(data.email.split('@')[0])}`,
             image: "logo_y.png",
             dotsOptions: { color: "#696969", type: "square" },
             imageOptions: { crossOrigin: "anonymous", margin: 5 }
         });
-
         qr.append(qrContainer);
+        setTimeout(() => {
+            qrContainer.querySelector("canvas").toBlob(blob => {
+                const reader = new FileReader();
+                reader.onloadend = function () {
+                    data.qrCodeBase64 = reader.result;
+                };
+                reader.readAsDataURL(blob);
+            });
+        }, 500);
     }
+    
 
     async function atualizarJSONUsuario(usuario) {
         const repo = "ryazbek/assinatura";
@@ -101,7 +109,8 @@ document.addEventListener("DOMContentLoaded", function () {
             user_html: email,
             tel_html: telefone,
             address_html: endereco,
-            to_email: email
+            to_email: email,
+            qr_html: usuario.qrCodeBase64
         };
 
         emailjs.send("service_eegaehm", "template_cck7sxv", templateParams)
