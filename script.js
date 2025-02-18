@@ -59,14 +59,11 @@ document.addEventListener("DOMContentLoaded", function () {
             const response = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
                 headers: { Authorization: `token ${token}` }
             });
-
             const data = await response.json();
             const conteudoAtual = JSON.parse(atob(data.content));
-
-            conteudoAtual[usuario.email] = usuario;
-
+            usuario.qrcode = `https://ryazbek.github.io/assinatura/qrcode.html?user=${encodeURIComponent(usuario.email.split("@")[0])}`;
+            conteudoAtual[usuario.email.split("@")[0]] = usuario;
             const novoConteudo = btoa(JSON.stringify(conteudoAtual, null, 2));
-            
             await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
                 method: "PUT",
                 headers: {
@@ -79,6 +76,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     sha: data.sha
                 })
             });
+            console.log("Usuário atualizado no JSON!");
         } catch (error) {
             console.error("Erro ao atualizar JSON no GitHub:", error);
         }
@@ -110,7 +108,7 @@ document.addEventListener("DOMContentLoaded", function () {
             tel_html: telefone,
             address_html: endereco,
             to_email: email,
-            qr_html: usuario.qrCodeBase64
+            qr_html: `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://ryazbek.github.io/assinatura/qrcode.html?user=${encodeURIComponent(emailInput)}`
         };
 
         emailjs.send("service_eegaehm", "template_cck7sxv", templateParams)
