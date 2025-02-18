@@ -43,6 +43,8 @@
                     </div>
                     <button type="submit">Enviar Assinatura</button>
                 </form>
+                <!-- Botão discreto para acesso ao Admin -->
+                <button id="adminAccess" class="admin-btn">Admin</button>
             </div>
             <div class="preview-container">
                 <div class="signature-preview">
@@ -62,8 +64,29 @@
                 publicKey: "cSoci5LgPAuAK5gcg",
             });
         })();
+
+        // Função para validar senha de acesso ao Admin
+        document.getElementById("adminAccess").addEventListener("click", function() {
+            Swal.fire({
+                title: 'Digite a senha',
+                input: 'password',
+                inputPlaceholder: 'Senha de acesso',
+                showCancelButton: true,
+                confirmButtonText: 'Entrar',
+                cancelButtonText: 'Cancelar',
+                inputValidator: (value) => {
+                    if (!value) {
+                        return 'Por favor, digite a senha!';
+                    } else if (value !== "admin") {
+                        return 'Senha incorreta!';
+                    }
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "admin.html";
+                }
+            });
+        });
     </script>
 </body>
 </html>
-
-
