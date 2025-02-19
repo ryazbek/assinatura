@@ -7,6 +7,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const part1 = "github_pat_11BAT4VNQ0qNdg0zpABmge_SbxoeDoJ";
     const part2 = "FJWVzptAVoAzMsOJnhqQufzSFkMk8Dgqaz4QGRHAJ5GGqkDGSuJ";
     const GITHUB_TOKEN = part1 + part2;
+    const repoOwner = "ryazbek";
+    const repoName = "assinatura";
+    const filePath = "data/usuarios.json";
+    const branch = "main";
+    const token = GITHUB_TOKEN;
 
     function updatePreview() {
         const nome = document.getElementById("nome").value || "Seu Nome";
@@ -57,11 +62,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     async function commitUsuariosJSON(usuario) {
-        const repoOwner = "ryazbek";
-        const repoName = "assinatura";
-        const filePath = "data/usuarios.json";
-        const branch = "main";
-        const token = GITHUB_TOKEN;
     
         const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
     
