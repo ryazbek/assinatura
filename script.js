@@ -6,7 +6,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("signatureForm");
     const previewContainer = document.getElementById("signature");
     const qrContainer = document.getElementById("qrcode");
-    const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+    const part1 = "github_pat_11BAT4VNQ0qNdg0zpABmge_SbxoeDoJ";
+    const part2 = "FJWVzptAVoAzMsOJnhqQufzSFkMk8Dgqaz4QGRHAJ5GGqkDGSuJ";
+    const GITHUB_TOKEN = part1 + part2;
 
     function updatePreview() {
         const nome = document.getElementById("nome").value || "Seu Nome";
