@@ -148,6 +148,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     form.addEventListener("submit", async function (event) {
         event.preventDefault();
+        console.log("🔵 Formulário enviado!");
 
         const nome = document.getElementById("nome").value.trim();
         const cargo = document.getElementById("cargo").value.trim();
@@ -163,16 +164,19 @@ document.addEventListener("DOMContentLoaded", function () {
         const email = emailInput + "@ryazbek.com.br";
         let usuario = { nome, cargo, email, telefone, endereco };
 
-        // Gera QR Code e adiciona ao usuário
+        console.log("🔄 Gerando QR Code...");
         usuario = await gerarQRCode(usuario);
+        console.log("✅ QR Code gerado!");
 
-        // Atualiza JSON no repositório
+        console.log("🔄 Commitando usuarios.json...");
         await commitUsuariosJSON(usuario);
+        console.log("✅ Commit realizado!");
 
-        // Espera o GitHub Actions concluir a geração do QR Code
+        console.log("⏳ Aguardando GitHub Actions...");
         const workflowFinalizado = await esperarWorkflowConcluir();
 
         if (workflowFinalizado) {
+            console.log("✅ GitHub Actions concluído! Enviando e-mail...");
             const templateParams = {
                 nome_html: nome,
                 cargo_html: cargo,
@@ -186,6 +190,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             try {
                 await emailjs.send("service_eegaehm", "template_cck7sxv", templateParams);
+                console.log("📩 E-mail enviado com sucesso!");
                 window.location.href = "obrigado.html";
             } catch (error) {
                 console.error("Erro ao enviar e-mail:", error);
