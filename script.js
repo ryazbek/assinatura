@@ -1,5 +1,3 @@
-require('dotenv').config(); // Carrega as variáveis do .env
-
 document.addEventListener("DOMContentLoaded", function () {
     emailjs.init("cSoci5LgPAuAK5gcg");
 
@@ -63,7 +61,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const repoName = "assinatura";
         const filePath = "data/usuarios.json";
         const branch = "main";
-        const token = GITHUB_TOKEN;  // Certifique-se de que GITHUB_TOKEN está definido corretamente
+        const token = GITHUB_TOKEN;
     
         const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
     
