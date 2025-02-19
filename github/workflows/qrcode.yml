@@ -1,0 +1,35 @@
+name: Gerar QR Code
+
+on:
+  push:
+    paths:
+      - "data/usuarios.json"
+  workflow_dispatch:
+
+jobs:
+  generate_qr:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Clonar Repositório
+        uses: actions/checkout@v3
+
+      - name: 🔧 Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      - name: 📦 Instalar Dependências
+        run: pip install qrcode[pil]
+
+      - name: 🖼️ Gerar QR Codes para Novos Usuários
+        run: python qr.py
+
+      - name: 🚀 Comitar e Enviar QR Codes Gerados
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add qrcodes/
+          git commit -m "🔄 Atualizando QR Codes automaticamente"
+          git push
+        continue-on-error: true

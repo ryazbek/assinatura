@@ -1,9 +1,12 @@
+require('dotenv').config(); // Carrega as variáveis do .env
+
 document.addEventListener("DOMContentLoaded", function () {
     emailjs.init("cSoci5LgPAuAK5gcg");
 
     const form = document.getElementById("signatureForm");
     const previewContainer = document.getElementById("signature");
     const qrContainer = document.getElementById("qrcode");
+    const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 
     function updatePreview() {
         const nome = document.getElementById("nome").value || "Seu Nome";
@@ -38,48 +41,84 @@ document.addEventListener("DOMContentLoaded", function () {
             imageOptions: { crossOrigin: "anonymous", margin: 5 }
         });
         qr.append(qrContainer);
-        setTimeout(() => {
-            qrContainer.querySelector("canvas").toBlob(blob => {
-                const reader = new FileReader();
-                reader.onloadend = function () {
-                    data.qrCodeBase64 = reader.result;
-                };
-                reader.readAsDataURL(blob);
-            });
-        }, 500);
-    }
-    
 
-    async function atualizarJSONUsuario(usuario) {
-        const repo = "ryazbek/assinatura";
-        const path = "data/usuarios.json";
-        const token = "SEU_PERSONAL_ACCESS_TOKEN";
-        
-        try {
-            const response = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
-                headers: { Authorization: `token ${token}` }
-            });
-            const data = await response.json();
-            const conteudoAtual = JSON.parse(atob(data.content));
-            usuario.qrcode = `https://ryazbek.github.io/assinatura/qrcode.html?user=${encodeURIComponent(usuario.email.split("@")[0])}`;
-            conteudoAtual[usuario.email.split("@")[0]] = usuario;
-            const novoConteudo = btoa(JSON.stringify(conteudoAtual, null, 2));
-            await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
-                method: "PUT",
-                headers: {
-                    Authorization: `token ${token}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    message: `Atualizando usuário ${usuario.email}`,
-                    content: novoConteudo,
-                    sha: data.sha
-                })
-            });
-            console.log("Usuário atualizado no JSON!");
-        } catch (error) {
-            console.error("Erro ao atualizar JSON no GitHub:", error);
+        return new Promise(resolve => {
+            setTimeout(() => {
+                qrContainer.querySelector("canvas").toBlob(blob => {
+                    const reader = new FileReader();
+                    reader.onloadend = function () {
+                        data.qrCodeBase64 = reader.result;
+                        resolve(data);
+                    };
+                    reader.readAsDataURL(blob);
+                });
+            }, 500);
+        });
+    }
+
+    async function commitUsuariosJSON(usuario) {
+        const repoOwner = "ryazbek";
+        const repoName = "assinatura";
+        const filePath = "data/usuarios.json";
+        const branch = "main";
+
+        const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
+
+        // Obtém o SHA do arquivo existente
+        const response = await fetch(apiUrl, {
+            headers: { Authorization: `token ${GITHUB_TOKEN}` },
+        });
+        const data = await response.json();
+        const sha = data.sha;
+
+        // Atualiza o arquivo no repositório
+        const updateResponse = await fetch(apiUrl, {
+            method: "PUT",
+            headers: {
+                Authorization: `token ${GITHUB_TOKEN}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                message: "Atualizando usuários.json para novo usuário",
+                content: btoa(JSON.stringify(usuario, null, 2)),
+                sha: sha,
+                branch: branch,
+            }),
+        });
+
+        if (updateResponse.ok) {
+            console.log("✅ `usuarios.json` atualizado e commit enviado!");
+        } else {
+            console.error("❌ Erro ao atualizar `usuarios.json`.");
         }
+    }
+
+    async function esperarWorkflowConcluir() {
+        const repoOwner = "ryazbek";
+        const repoName = "assinatura";
+        const workflowId = "qrcode.yml";
+
+        let status = "queued";
+
+        while (status === "queued" || status === "in_progress") {
+            await new Promise((resolve) => setTimeout(resolve, 5000));
+
+            const response = await fetch(
+                `https://api.github.com/repos/${repoOwner}/${repoName}/actions/workflows/${workflowId}/runs`,
+                {
+                    headers: { Authorization: `token ${GITHUB_TOKEN}` },
+                }
+            );
+
+            const data = await response.json();
+            if (data.workflow_runs.length > 0) {
+                status = data.workflow_runs[0].status;
+                console.log(`⏳ Status do Actions: ${status}`);
+            }
+        }
+
+        console.log("✅ GitHub Actions finalizado! Agora enviando e-mail...");
+        return status === "completed";
     }
 
     form.addEventListener("submit", async function (event) {
@@ -97,27 +136,38 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         const email = emailInput + "@ryazbek.com.br";
-        const usuario = { nome, cargo, email, telefone, endereco };
+        let usuario = { nome, cargo, email, telefone, endereco };
 
-        await atualizarJSONUsuario(usuario);
+        // Gera QR Code e adiciona ao usuário
+        usuario = await gerarQRCode(usuario);
 
-        const templateParams = {
-            nome_html: nome,
-            cargo_html: cargo,
-            user_html: email,
-            tel_html: telefone,
-            address_html: endereco,
-            to_email: email,
-            qr_html: `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://ryazbek.github.io/assinatura/qrcode.html?user=${encodeURIComponent(emailInput)}`
-        };
+        // Atualiza JSON no repositório
+        await commitUsuariosJSON(usuario);
 
-        emailjs.send("service_eegaehm", "template_cck7sxv", templateParams)
-            .then(() => {
+        // Espera o GitHub Actions concluir a geração do QR Code
+        const workflowFinalizado = await esperarWorkflowConcluir();
+
+        if (workflowFinalizado) {
+            const templateParams = {
+                nome_html: nome,
+                cargo_html: cargo,
+                user_html: email,
+                tel_html: telefone,
+                address_html: endereco,
+                to_email: email,
+                qr_html: usuario.qrCodeBase64,
+                qrcode_url: `https://raw.githubusercontent.com/ryazbek/assinatura/main/qrcodes/${emailInput}.png`
+            };
+
+            try {
+                await emailjs.send("service_eegaehm", "template_cck7sxv", templateParams);
                 window.location.href = "obrigado.html";
-            })
-            .catch(error => {
+            } catch (error) {
                 console.error("Erro ao enviar e-mail:", error);
                 Swal.fire("Erro!", `Ocorreu um erro ao enviar a assinatura: ${error.text || "Erro desconhecido"}`, "error");
-            });
+            }
+        } else {
+            Swal.fire("Erro!", "Ocorreu um erro ao gerar o QR Code.", "error");
+        }
     });
 });

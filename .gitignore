@@ -1,0 +1,8 @@
+# Ignorar arquivos de variáveis de ambiente
+.env
+
+# Ignorar outras credenciais
+*.pem
+*.key
+*.crt
+config/secrets.yml
