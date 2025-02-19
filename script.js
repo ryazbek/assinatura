@@ -61,35 +61,60 @@ document.addEventListener("DOMContentLoaded", function () {
         const repoName = "assinatura";
         const filePath = "data/usuarios.json";
         const branch = "main";
-
+        const token = GITHUB_TOKEN;  // Certifique-se de que GITHUB_TOKEN está definido corretamente
+    
         const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
-
-        // Obtém o SHA do arquivo existente
-        const response = await fetch(apiUrl, {
-            headers: { Authorization: `token ${GITHUB_TOKEN}` },
-        });
-        const data = await response.json();
-        const sha = data.sha;
-
-        // Atualiza o arquivo no repositório
-        const updateResponse = await fetch(apiUrl, {
-            method: "PUT",
-            headers: {
-                Authorization: `token ${GITHUB_TOKEN}`,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                message: "Atualizando usuários.json para novo usuário",
-                content: btoa(JSON.stringify(usuario, null, 2)),
-                sha: sha,
-                branch: branch,
-            }),
-        });
-
-        if (updateResponse.ok) {
-            console.log("✅ `usuarios.json` atualizado e commit enviado!");
-        } else {
-            console.error("❌ Erro ao atualizar `usuarios.json`.");
+    
+        try {
+            // Obtém o conteúdo atual do arquivo
+            const response = await fetch(apiUrl, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+    
+            if (!response.ok) {
+                throw new Error(`Erro ao buscar usuarios.json: ${response.statusText}`);
+            }
+    
+            const data = await response.json();
+            const sha = data.sha;
+    
+            // Decodifica o JSON atual
+            let usuariosAtuais = [];
+            try {
+                usuariosAtuais = JSON.parse(atob(data.content));
+            } catch (e) {
+                console.error("Erro ao decodificar usuarios.json:", e);
+            }
+    
+            // Adiciona o novo usuário
+            usuariosAtuais.push(usuario);
+    
+            // Converte para Base64 corretamente
+            const novoConteudoBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(usuariosAtuais, null, 2))));
+    
+            // Atualiza o arquivo no repositório
+            const updateResponse = await fetch(apiUrl, {
+                method: "PUT",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    message: "Atualizando usuarios.json para novo usuário",
+                    content: novoConteudoBase64,
+                    sha: sha,
+                    branch: branch,
+                }),
+            });
+    
+            if (updateResponse.ok) {
+                console.log("✅ `usuarios.json` atualizado e commit enviado!");
+            } else {
+                const errorText = await updateResponse.text();
+                throw new Error(`❌ Erro ao atualizar usuarios.json: ${errorText}`);
+            }
+        } catch (error) {
+            console.error("❌ Erro no commit:", error);
         }
     }
 
