@@ -63,7 +63,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     async function commitUsuariosJSON(usuario) {
     
-        const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
+        const apiUrl = `https://api.github.com/repos/ryazbek/assinatura/contents/usuarios.json`;
     
         try {
             // Obtém o conteúdo atual do arquivo
