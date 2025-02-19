@@ -116,7 +116,7 @@ document.addEventListener("DOMContentLoaded", function () {
         } catch (error) {
             console.error("❌ Erro no commit:", error);
         }
-    }
+    }    
 
     async function esperarWorkflowConcluir() {
         const repoOwner = "ryazbek";
