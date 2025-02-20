@@ -35,98 +35,53 @@ document.addEventListener("DOMContentLoaded", function () {
         input.addEventListener("input", updatePreview);
     });
 
-    function gerarQRCode(data) {
-        qrContainer.innerHTML = "";
-        const qr = new QRCodeStyling({
-            width: 150,
-            height: 150,
-            data: `https://ryazbek.github.io/assinatura/qrcode.html?user=${encodeURIComponent(data.email.split('@')[0])}`,
-            image: "logo_y.png",
-            dotsOptions: { color: "#696969", type: "square" },
-            imageOptions: { crossOrigin: "anonymous", margin: 5 }
-        });
-        qr.append(qrContainer);
-
-        return new Promise(resolve => {
-            setTimeout(() => {
-                qrContainer.querySelector("canvas").toBlob(blob => {
-                    const reader = new FileReader();
-                    reader.onloadend = function () {
-                        data.qrCodeBase64 = reader.result;
-                        resolve(data);
-                    };
-                    reader.readAsDataURL(blob);
-                });
-            }, 500);
-        });
-    }
-
     async function commitUsuariosJSON(usuario) {
         const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
-    
-        try {
-            const response = await fetch(apiUrl, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-    
-            let usuariosAtuais = [];
-    
-            if (response.ok) {
-                const data = await response.json();
-                const sha = data.sha;
-    
-                try {
-                    const decodedContent = atob(data.content);
-                    usuariosAtuais = JSON.parse(decodedContent);
-    
-                    if (!Array.isArray(usuariosAtuais)) {
-                        console.warn("usuarios.json não é um array, resetando...");
-                        usuariosAtuais = [];
-                    }
-                } catch (e) {
-                    console.error("❌ Erro ao decodificar usuarios.json:", e);
-                    usuariosAtuais = [];
-                }
-    
-                usuariosAtuais.push(usuario);
-    
-                const novoConteudoBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(usuariosAtuais, null, 2))));
-    
-                const updateResponse = await fetch(apiUrl, {
-                    method: "PUT",
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        message: `Atualizando usuarios.json - Adicionado ${usuario.nome}`,
-                        content: novoConteudoBase64,
-                        sha: sha,
-                        branch: branch,
-                    }),
-                });
-    
-                if (updateResponse.ok) {
-                    console.log("✅ `usuarios.json` atualizado e commit enviado!");
-                } else {
-                    const errorText = await updateResponse.text();
-                    throw new Error(`❌ Erro ao atualizar usuarios.json: ${errorText}`);
-                }
-            }
-        } catch (error) {
-            console.error("❌ Erro no commit:", error);
+        let usuariosAtuais = [];
+        let sha = "";
+
+        const response = await fetch(apiUrl, { headers: { Authorization: `Bearer ${token}` } });
+        if (response.ok) {
+            const data = await response.json();
+            sha = data.sha;
+            usuariosAtuais = JSON.parse(atob(data.content)) || [];
         }
+        usuariosAtuais.push(usuario);
+        const novoConteudoBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(usuariosAtuais, null, 2))));
+
+        await fetch(apiUrl, {
+            method: "PUT",
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                message: `Atualizando usuarios.json - Adicionado ${usuario.nome}`,
+                content: novoConteudoBase64,
+                sha: sha,
+                branch: branch,
+            }),
+        });
     }
 
-    async function atualizarUsuariosEEsperar() {
-        console.log("⏳ Atualizando usuarios.json...");
-        await commitUsuariosJSON();
+    async function esperarWorkflowConcluir(workflowId) {
+        let status = "queued";
+        while (status === "queued" || status === "in_progress") {
+            await new Promise(resolve => setTimeout(resolve, 5000));
+            const response = await fetch(
+                `https://api.github.com/repos/${repoOwner}/${repoName}/actions/workflows/${workflowId}/runs`,
+                { headers: { Authorization: `token ${GITHUB_TOKEN}` } }
+            );
+            const data = await response.json();
+            if (data.workflow_runs && data.workflow_runs.length > 0) {
+                status = data.workflow_runs[0].status;
+            }
+        }
+        return status === "completed";
+    }
 
-        console.log("✅ usuarios.json atualizado! Agora gerando QR Code...");
-        await esperarWorkflowConcluir("usuarios.json.yml");
-
-        console.log("⏳ Iniciando workflow de QR Code...");
-        await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/actions/workflows/qrcode.yml/dispatches`, {
+    async function iniciarEEsperarWorkflow(workflowId) {
+        await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/actions/workflows/${workflowId}/dispatches`, {
             method: "POST",
             headers: {
                 Authorization: `Bearer ${GITHUB_TOKEN}`,
@@ -135,15 +90,53 @@ document.addEventListener("DOMContentLoaded", function () {
             },
             body: JSON.stringify({ ref: branch }),
         });
-
-        await esperarWorkflowConcluir("qrcode.yml");
-        console.log("✅ QR Code gerado! Agora enviando e-mail...");
-        enviarEmail();
+        return await esperarWorkflowConcluir(workflowId);
     }
 
     form.addEventListener("submit", async function (event) {
         event.preventDefault();
         console.log("🔵 Formulário enviado!");
-        await atualizarUsuariosEEsperar();
+
+        const nome = document.getElementById("nome").value.trim();
+        const cargo = document.getElementById("cargo").value.trim();
+        const emailInput = document.getElementById("email").value.trim();
+        const telefone = document.getElementById("telefone").value.trim();
+        const endereco = document.getElementById("endereco").value.trim();
+
+        if (!nome || !cargo || !emailInput || !telefone || !endereco) {
+            Swal.fire("Erro!", "Preencha todos os campos antes de enviar.", "error");
+            return;
+        }
+
+        const email = emailInput + "@ryazbek.com.br";
+        let usuario = { nome, cargo, email, telefone, endereco };
+
+        await commitUsuariosJSON(usuario);
+        console.log("✅ Commit realizado!");
+
+        const usuariosJsonCompleto = await iniciarEEsperarWorkflow("usuarios.json.yml");
+        if (!usuariosJsonCompleto) return Swal.fire("Erro!", "Erro ao processar usuarios.json.", "error");
+
+        const qrCodeCompleto = await iniciarEEsperarWorkflow("qrcode.yml");
+        if (!qrCodeCompleto) return Swal.fire("Erro!", "Erro ao gerar QR Code.", "error");
+
+        const templateParams = {
+            nome_html: nome,
+            cargo_html: cargo,
+            user_html: email,
+            tel_html: telefone,
+            address_html: endereco,
+            to_email: email,
+            qr_html: usuario.qrCodeBase64,
+            qrcode_url: `https://raw.githubusercontent.com/ryazbek/assinatura/main/qrcodes/${emailInput}.png`
+        };
+
+        try {
+            await emailjs.send("service_eegaehm", "template_cck7sxv", templateParams);
+            console.log("📩 E-mail enviado com sucesso!");
+            window.location.href = "obrigado.html";
+        } catch (error) {
+            Swal.fire("Erro!", `Erro ao enviar e-mail: ${error.text || "Erro desconhecido"}`, "error");
+        }
     });
 });
