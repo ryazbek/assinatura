@@ -100,7 +100,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         "Content-Type": "application/json",
                     },
                     body: JSON.stringify({
-                        message: "Atualizando usuarios.json para novo usuário",
+                        message: `Atualizando usuarios.json - Adicionado ${usuario.nome}`,
                         content: novoConteudoBase64,
                         sha: sha,
                         branch: branch,
