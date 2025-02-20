@@ -70,47 +70,74 @@ document.addEventListener("DOMContentLoaded", function () {
                 headers: { Authorization: `Bearer ${token}` },
             });
     
-            if (!response.ok) {
-                throw new Error(`Erro ao buscar usuarios.json: ${response.statusText}`);
-            }
-    
-            const data = await response.json();
-            const sha = data.sha;
-    
-            // Decodifica o JSON atual
             let usuariosAtuais = [];
-            try {
-                usuariosAtuais = JSON.parse(atob(data.content));
-            } catch (e) {
-                console.error("Erro ao decodificar usuarios.json:", e);
-            }
     
-            // Adiciona o novo usuário
-            usuariosAtuais.push(usuario);
+            if (response.ok) {
+                const data = await response.json();
+                const sha = data.sha;
     
-            // Converte para Base64 corretamente
-            const novoConteudoBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(usuariosAtuais, null, 2))));
+                try {
+                    const decodedContent = atob(data.content);
+                    usuariosAtuais = JSON.parse(decodedContent);
     
-            // Atualiza o arquivo no repositório
-            const updateResponse = await fetch(apiUrl, {
-                method: "PUT",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    message: "Atualizando usuarios.json para novo usuário",
-                    content: novoConteudoBase64,
-                    sha: sha,
-                    branch: branch,
-                }),
-            });
+                    if (!Array.isArray(usuariosAtuais)) {
+                        console.warn("usuarios.json não é um array, resetando...");
+                        usuariosAtuais = [];
+                    }
+                } catch (e) {
+                    console.error("❌ Erro ao decodificar usuarios.json:", e);
+                    usuariosAtuais = [];
+                }
     
-            if (updateResponse.ok) {
-                console.log("✅ `usuarios.json` atualizado e commit enviado!");
+                usuariosAtuais.push(usuario);
+    
+                const novoConteudoBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(usuariosAtuais, null, 2))));
+    
+                const updateResponse = await fetch(apiUrl, {
+                    method: "PUT",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        message: "Atualizando usuarios.json para novo usuário",
+                        content: novoConteudoBase64,
+                        sha: sha,
+                        branch: branch,
+                    }),
+                });
+    
+                if (updateResponse.ok) {
+                    console.log("✅ `usuarios.json` atualizado e commit enviado!");
+                } else {
+                    const errorText = await updateResponse.text();
+                    throw new Error(`❌ Erro ao atualizar usuarios.json: ${errorText}`);
+                }
             } else {
-                const errorText = await updateResponse.text();
-                throw new Error(`❌ Erro ao atualizar usuarios.json: ${errorText}`);
+                console.warn("usuarios.json não encontrado, criando um novo.");
+                usuariosAtuais.push(usuario);
+    
+                const novoConteudoBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(usuariosAtuais, null, 2))));
+    
+                const createResponse = await fetch(apiUrl, {
+                    method: "PUT",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        message: "Criando usuarios.json",
+                        content: novoConteudoBase64,
+                        branch: branch,
+                    }),
+                });
+    
+                if (createResponse.ok) {
+                    console.log("✅ `usuarios.json` criado e commit enviado!");
+                } else {
+                    const errorText = await createResponse.text();
+                    throw new Error(`❌ Erro ao criar usuarios.json: ${errorText}`);
+                }
             }
         } catch (error) {
             console.error("❌ Erro no commit:", error);
