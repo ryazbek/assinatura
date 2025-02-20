@@ -114,7 +114,7 @@ document.addEventListener("DOMContentLoaded", function () {
         await commitUsuariosJSON(usuario);
         console.log("✅ Commit realizado!");
 
-        const usuariosJsonCompleto = await iniciarEEsperarWorkflow("usuarios.json.yml");
+        const usuariosJsonCompleto = await iniciarEEsperarWorkflow(`Atualizando usuarios.json - Adicionado ${usuario.nome}`);
         if (!usuariosJsonCompleto) return Swal.fire("Erro!", "Erro ao processar usuarios.json.", "error");
 
         const qrCodeCompleto = await iniciarEEsperarWorkflow("qrcode.yml");
