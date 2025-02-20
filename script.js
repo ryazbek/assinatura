@@ -81,6 +81,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     async function getWorkflowId(workflowName) {
+        console.log(`⌛ Aguardando 5 segundos antes de buscar workflow: "${workflowName}"...`);
+        await new Promise(resolve => setTimeout(resolve, 5000)); // Aguarda 5 segundos
+    
         const response = await fetch(
             `https://api.github.com/repos/${repoOwner}/${repoName}/actions/runs`,
             { headers: { Authorization: `Bearer ${GITHUB_TOKEN}` } }
@@ -88,19 +91,23 @@ document.addEventListener("DOMContentLoaded", function () {
         const data = await response.json();
     
         if (!data.workflow_runs) {
-            console.error("Nenhum workflow encontrado.");
+            console.error("❌ Nenhum workflow encontrado.");
             return null;
         }
     
         const workflow = data.workflow_runs.find(run => run.name.includes(workflowName));
     
+        if (!workflow) {
+            console.error(`❌ Workflow "${workflowName}" não encontrado.`);
+        }
+    
         return workflow ? workflow.workflow_id : null;
     }
     
-    async function iniciarEEsperarWorkflow(workflowName) {
+    async function iniciarEEsperarWorkflowPorNome(workflowName) {
         const workflowId = await getWorkflowId(workflowName);
         if (!workflowId) {
-            console.error(`🚨 Workflow "${workflowName}" não encontrado.`);
+            console.error(`🚨 Workflow "${workflowName}" ainda não foi encontrado.`);
             return false;
         }
     
@@ -115,7 +122,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     
         return await esperarWorkflowConcluir(workflowId);
-    }
+    }    
 
     form.addEventListener("submit", async function (event) {
         event.preventDefault();
