@@ -109,6 +109,7 @@ document.addEventListener("DOMContentLoaded", function () {
     
                 if (updateResponse.ok) {
                     console.log("✅ `usuarios.json` atualizado e commit enviado!");
+                    console.log("🔄 Indo para próxima etapa: GitHub Actions...");
                 } else {
                     const errorText = await updateResponse.text();
                     throw new Error(`❌ Erro ao atualizar usuarios.json: ${errorText}`);
@@ -162,9 +163,11 @@ document.addEventListener("DOMContentLoaded", function () {
             );
 
             const data = await response.json();
-            if (data.workflow_runs.length > 0) {
+            if (data.workflow_runs && data.workflow_runs.length > 0) {
                 status = data.workflow_runs[0].status;
                 console.log(`⏳ Status do Actions: ${status}`);
+            } else {
+                console.error("⚠️ Nenhuma execução do workflow encontrada!");
             }
         }
 
@@ -217,6 +220,7 @@ document.addEventListener("DOMContentLoaded", function () {
             try {
                 await emailjs.send("service_eegaehm", "template_cck7sxv", templateParams);
                 console.log("📩 E-mail enviado com sucesso!");
+                console.log("🔄 Redirecionando para obrigado.html...");
                 window.location.href = "obrigado.html";
             } catch (error) {
                 console.error("Erro ao enviar e-mail:", error);
