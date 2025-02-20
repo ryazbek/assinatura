@@ -80,7 +80,30 @@ document.addEventListener("DOMContentLoaded", function () {
         return status === "completed";
     }
 
-    async function iniciarEEsperarWorkflow(workflowId) {
+    async function getWorkflowId(workflowName) {
+        const response = await fetch(
+            `https://api.github.com/repos/${repoOwner}/${repoName}/actions/runs`,
+            { headers: { Authorization: `Bearer ${GITHUB_TOKEN}` } }
+        );
+        const data = await response.json();
+    
+        if (!data.workflow_runs) {
+            console.error("Nenhum workflow encontrado.");
+            return null;
+        }
+    
+        const workflow = data.workflow_runs.find(run => run.name.includes(workflowName));
+    
+        return workflow ? workflow.workflow_id : null;
+    }
+    
+    async function iniciarEEsperarWorkflow(workflowName) {
+        const workflowId = await getWorkflowId(workflowName);
+        if (!workflowId) {
+            console.error(`🚨 Workflow "${workflowName}" não encontrado.`);
+            return false;
+        }
+    
         await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/actions/workflows/${workflowId}/dispatches`, {
             method: "POST",
             headers: {
@@ -90,6 +113,7 @@ document.addEventListener("DOMContentLoaded", function () {
             },
             body: JSON.stringify({ ref: branch }),
         });
+    
         return await esperarWorkflowConcluir(workflowId);
     }
 
