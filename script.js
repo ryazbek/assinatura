@@ -3,15 +3,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const form = document.getElementById("signatureForm");
     const previewContainer = document.getElementById("signature");
-    const qrContainer = document.getElementById("qrcode");
-    const part1 = "github_pat_11BAT4VNQ0qNdg0zpABmge_SbxoeDoJ";
-    const part2 = "FJWVzptAVoAzMsOJnhqQufzSFkMk8Dgqaz4QGRHAJ5GGqkDGSuJ";
-    const GITHUB_TOKEN = part1 + part2;
-    const branch = "main";
-    const token = GITHUB_TOKEN;
-    const repoOwner = "ryazbek";
-    const repoName = "assinatura";
-    const filePath = "usuarios.json";
 
     function updatePreview() {
         const nome = document.getElementById("nome").value || "Seu Nome";
@@ -27,8 +18,6 @@ document.addEventListener("DOMContentLoaded", function () {
             <span style="color:#696969;">Tel: ${telefone}</span><br>
             <span style="color:#696969;">${endereco}</span>
         `;
-
-        gerarQRCode({ nome, cargo, email, telefone, endereco });
     }
 
     document.querySelectorAll("input").forEach(input => {
@@ -51,20 +40,14 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         const email = emailInput + "@ryazbek.com.br";
-        let usuario = { nome, cargo, email, telefone, endereco };
-
-        await commitUsuariosJSON(usuario);
-        console.log("✅ Commit realizado!");
-
+        
         const templateParams = {
             nome_html: nome,
             cargo_html: cargo,
             user_html: email,
             tel_html: telefone,
             address_html: endereco,
-            to_email: email,
-            qr_html: usuario.qrCodeBase64,
-            qrcode_url: `https://raw.githubusercontent.com/ryazbek/assinatura/main/qrcodes/${emailInput}.png`
+            to_email: email
         };
 
         try {
