@@ -3,7 +3,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const form = document.getElementById("signatureForm");
     const previewContainer = document.getElementById("signature");
-    const qrContainer = document.getElementById("qrcode");
 
     function updatePreview() {
         const nome = document.getElementById("nome").value || "Seu Nome";
@@ -19,14 +18,12 @@ document.addEventListener("DOMContentLoaded", function () {
             <span style="color:#696969;">Tel: ${telefone}</span><br>
             <span style="color:#696969;">${endereco}</span>
         `;
-
-        gerarQRCode({ nome, cargo, email, telefone, endereco });
     }
 
     document.querySelectorAll("input").forEach(input => {
         input.addEventListener("input", updatePreview);
     });
-
+    
     form.addEventListener("submit", async function (event) {
         event.preventDefault();
 
@@ -42,6 +39,9 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         const email = emailInput + "@ryazbek.com.br";
+        const usuario = { nome, cargo, email, telefone, endereco };
+
+        await atualizarJSONUsuario(usuario);
 
         const templateParams = {
             nome_html: nome,
