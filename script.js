@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll("input").forEach(input => {
         input.addEventListener("input", updatePreview);
     });
-    
+
     form.addEventListener("submit", async function (event) {
         event.preventDefault();
 
@@ -39,10 +39,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         const email = emailInput + "@ryazbek.com.br";
-        const usuario = { nome, cargo, email, telefone, endereco };
-
-        await atualizarJSONUsuario(usuario);
-
         const templateParams = {
             nome_html: nome,
             cargo_html: cargo,
