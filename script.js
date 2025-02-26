@@ -4,7 +4,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("signatureForm");
     const previewContainer = document.getElementById("signature");
     const qrContainer = document.getElementById("qrcode");
-    let qrCodeUrl = "";
 
     function updatePreview() {
         const nome = document.getElementById("nome").value || "Seu Nome";
@@ -20,8 +19,6 @@ document.addEventListener("DOMContentLoaded", function () {
             <span style="color:#696969;">Tel: ${telefone}</span><br>
             <span style="color:#696969;">${endereco}</span>
         `;
-
-        gerarQRCodeMeQR(nome, cargo, email, telefone, endereco);
     }
 
     async function gerarQRCodeMeQR(nome, cargo, email, telefone, endereco) {
@@ -60,13 +57,14 @@ document.addEventListener("DOMContentLoaded", function () {
             const result = await response.json();
 
             if (result && result.qr_code_url) {
-                qrCodeUrl = result.qr_code_url;
-                qrContainer.innerHTML = `<img src="${qrCodeUrl}" alt="QR Code">`;
+                return result.qr_code_url;
             } else {
                 console.error("Erro ao gerar o QR Code:", result);
+                return "";
             }
         } catch (error) {
             console.error("Erro na requisição ao Me-QR:", error);
+            return "";
         }
     }
 
@@ -74,7 +72,7 @@ document.addEventListener("DOMContentLoaded", function () {
         input.addEventListener("input", updatePreview);
     });
 
-    form.addEventListener("submit", function (event) {
+    form.addEventListener("submit", async function (event) {
         event.preventDefault();
 
         const nome = document.getElementById("nome").value;
@@ -87,6 +85,24 @@ document.addEventListener("DOMContentLoaded", function () {
             Swal.fire("Erro!", "Preencha todos os campos antes de enviar.", "error");
             return;
         }
+
+        Swal.fire({
+            title: "Aguarde...",
+            text: "Gerando QR Code e enviando email.",
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        const qrCodeUrl = await gerarQRCodeMeQR(nome, cargo, email, telefone, endereco);
+
+        if (!qrCodeUrl) {
+            Swal.fire("Erro!", "Falha ao gerar o QR Code.", "error");
+            return;
+        }
+
+        qrContainer.innerHTML = `<img src="${qrCodeUrl}" alt="QR Code">`;
 
         const templateParams = {
             nome_html: nome,
