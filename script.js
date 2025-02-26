@@ -3,6 +3,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const form = document.getElementById("signatureForm");
     const previewContainer = document.getElementById("signature");
+    const qrContainer = document.getElementById("qrcode");
+    let qrCodeUrl = "";
 
     function updatePreview() {
         const nome = document.getElementById("nome").value || "Seu Nome";
@@ -18,6 +20,54 @@ document.addEventListener("DOMContentLoaded", function () {
             <span style="color:#696969;">Tel: ${telefone}</span><br>
             <span style="color:#696969;">${endereco}</span>
         `;
+
+        gerarQRCodeMeQR(nome, cargo, email, telefone, endereco);
+    }
+
+    async function gerarQRCodeMeQR(nome, cargo, email, telefone, endereco) {
+        const meQrToken = "102ea313e6bc9b5ec8673cf8aef71762f9f398b5e0cc103809f0f5ec42bfb2cc";
+        const qrData = {
+            token: meQrToken,
+            qrType: 2,
+            title: "Assinatura de E-mail",
+            service: "api",
+            format: "png",
+            qrOptions: {
+                color: "#696969",
+                logo: "https://ryazbek.github.io/logo_y.png"
+            },
+            qrFieldsData: {
+                vcard: {
+                    first_name: nome,
+                    last_name: "",
+                    job_title: cargo,
+                    email: email,
+                    phone: telefone,
+                    address: endereco
+                }
+            }
+        };
+
+        try {
+            const response = await fetch("https://me-qr.com/api/v1/create", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(qrData)
+            });
+
+            const result = await response.json();
+
+            if (result && result.qr_code_url) {
+                qrCodeUrl = result.qr_code_url;
+                qrContainer.innerHTML = `<img src="${qrCodeUrl}" alt="QR Code">`;
+            } else {
+                console.error("Erro ao gerar o QR Code:", result);
+            }
+        } catch (error) {
+            console.error("Erro na requisição ao Me-QR:", error);
+        }
     }
 
     document.querySelectorAll("input").forEach(input => {
@@ -25,7 +75,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     form.addEventListener("submit", function (event) {
-        event.preventDefault(); // Evita o recarregamento da página
+        event.preventDefault();
 
         const nome = document.getElementById("nome").value;
         const cargo = document.getElementById("cargo").value;
@@ -43,7 +93,8 @@ document.addEventListener("DOMContentLoaded", function () {
             cargo_html: cargo,
             user_html: email,
             tel_html: telefone,
-            address_html: endereco
+            address_html: endereco,
+            qr_html: `<img src="${qrCodeUrl}" alt="QR Code">`
         };
 
         emailjs.send("service_eegaehm", "template_cck7sxv", templateParams)
@@ -54,12 +105,12 @@ document.addEventListener("DOMContentLoaded", function () {
                     icon: "success",
                     confirmButtonText: "OK"
                 }).then(() => {
-                    window.location.href = "obrigado.html"; // Redireciona após fechar o alerta
+                    window.location.href = "obrigado.html";
                 });
             })
             .catch(function (error) {
                 console.error("Erro ao enviar e-mail:", error);
-                Swal.fire("Erro!", Ocorreu um erro ao enviar a assinatura: ${error.text || "Erro desconhecido"}, "error");
+                Swal.fire("Erro!", `Ocorreu um erro ao enviar a assinatura: ${error.text || "Erro desconhecido"}`, "error");
             });
     });
 });
