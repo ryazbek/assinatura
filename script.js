@@ -86,7 +86,7 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        Swal.fire({
+        /* Swal.fire({
             title: "Aguarde...",
             text: "Gerando QR Code e enviando email.",
             allowOutsideClick: false,
@@ -100,9 +100,9 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!qrCodeUrl) {
             Swal.fire("Erro!", "Falha ao gerar o QR Code.", "error");
             return;
-        }
+        } 
 
-        qrContainer.innerHTML = `<img src="${qrCodeUrl}" alt="QR Code">`;
+        qrContainer.innerHTML = `<img src="${qrCodeUrl}" alt="QR Code">`; */
 
         const templateParams = {
             nome_html: nome,
@@ -110,7 +110,7 @@ document.addEventListener("DOMContentLoaded", function () {
             user_html: email,
             tel_html: telefone,
             address_html: endereco,
-            qr_html: `<img src="${qrCodeUrl}" alt="QR Code">`
+            // qr_html: `<img src="${qrCodeUrl}" alt="QR Code">`
         };
 
         emailjs.send("service_eegaehm", "template_cck7sxv", templateParams)
