@@ -24,21 +24,20 @@ document.addEventListener("DOMContentLoaded", function () {
         input.addEventListener("input", updatePreview);
     });
 
-    form.addEventListener("submit", async function (event) {
-        event.preventDefault();
+    form.addEventListener("submit", function (event) {
+        event.preventDefault(); // Evita o recarregamento da página
 
-        const nome = document.getElementById("nome").value.trim();
-        const cargo = document.getElementById("cargo").value.trim();
-        const emailInput = document.getElementById("email").value.trim();
-        const telefone = document.getElementById("telefone").value.trim();
-        const endereco = document.getElementById("endereco").value.trim();
+        const nome = document.getElementById("nome").value;
+        const cargo = document.getElementById("cargo").value;
+        const email = document.getElementById("email").value + "@ryazbek.com.br";
+        const telefone = document.getElementById("telefone").value;
+        const endereco = document.getElementById("endereco").value;
 
-        if (!nome || !cargo || !emailInput || !telefone || !endereco) {
+        if (!nome || !cargo || !email || !telefone || !endereco) {
             Swal.fire("Erro!", "Preencha todos os campos antes de enviar.", "error");
             return;
         }
 
-        const email = emailInput + "@ryazbek.com.br";
         const templateParams = {
             nome_html: nome,
             cargo_html: cargo,
@@ -48,12 +47,19 @@ document.addEventListener("DOMContentLoaded", function () {
         };
 
         emailjs.send("service_eegaehm", "template_cck7sxv", templateParams)
-            .then(() => {
-                window.location.href = "obrigado.html";
+            .then(function (response) {
+                Swal.fire({
+                    title: "Sucesso!",
+                    text: "A assinatura foi enviada com sucesso.",
+                    icon: "success",
+                    confirmButtonText: "OK"
+                }).then(() => {
+                    window.location.href = "obrigado.html"; // Redireciona após fechar o alerta
+                });
             })
-            .catch(error => {
+            .catch(function (error) {
                 console.error("Erro ao enviar e-mail:", error);
-                Swal.fire("Erro!", `Ocorreu um erro ao enviar a assinatura: ${error.text || "Erro desconhecido"}`, "error");
+                Swal.fire("Erro!", Ocorreu um erro ao enviar a assinatura: ${error.text || "Erro desconhecido"}, "error");
             });
     });
 });
