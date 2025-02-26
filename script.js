@@ -44,8 +44,7 @@ document.addEventListener("DOMContentLoaded", function () {
             cargo_html: cargo,
             user_html: email,
             tel_html: telefone,
-            address_html: endereco,
-            to_email: email
+            address_html: endereco
         };
 
         emailjs.send("service_eegaehm", "template_cck7sxv", templateParams)
