@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", function () {
         `;
     }
 
-    async function gerarQRCodeMeQR(nome, cargo, email, telefone, endereco) {
+    /*async function gerarQRCodeMeQR(nome, cargo, email, telefone, endereco) {
         const meQrToken = "102ea313e6bc9b5ec8673cf8aef71762f9f398b5e0cc103809f0f5ec42bfb2cc";
         const qrData = {
             token: meQrToken,
@@ -66,7 +66,7 @@ document.addEventListener("DOMContentLoaded", function () {
             console.error("Erro na requisição ao Me-QR:", error);
             return "";
         }
-    }
+    }*/
 
     document.querySelectorAll("input").forEach(input => {
         input.addEventListener("input", updatePreview);
