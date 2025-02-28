@@ -7,7 +7,13 @@ document.addEventListener("DOMContentLoaded", function () {
     function updatePreview() {
         const nome = document.getElementById("nome").value || "Seu Nome";
         const cargo = document.getElementById("cargo").value || "Seu Cargo";
-        const email = (document.getElementById("email").value || "seu.nome") + "@ryazbek.com.br";
+
+        let emailInput = document.getElementById("email").value.trim();
+        if (emailInput.endsWith("@ryazbek.com.br")) {
+            emailInput = emailInput.replace("@ryazbek.com.br", "");
+        }
+        const email = emailInput + "@ryazbek.com.br";
+
         const telefone = document.getElementById("telefone").value || "Seu Telefone";
         const endereco = document.getElementById("endereco").value || "Endereço da obra ou escritório";
 
@@ -29,11 +35,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const nome = document.getElementById("nome").value;
         const cargo = document.getElementById("cargo").value;
-        const email = document.getElementById("email").value + "@ryazbek.com.br";
+
+        let emailInput = document.getElementById("email").value.trim();
+        if (emailInput.endsWith("@ryazbek.com.br")) {
+            emailInput = emailInput.replace("@ryazbek.com.br", "");
+        }
+        const email = emailInput + "@ryazbek.com.br";
+
         const telefone = document.getElementById("telefone").value;
         const endereco = document.getElementById("endereco").value;
 
-        if (!nome || !cargo || !email || !telefone || !endereco) {
+        if (!nome || !cargo || !emailInput || !telefone || !endereco) {
             Swal.fire("Erro!", "Preencha todos os campos antes de enviar.", "error");
             return;
         }

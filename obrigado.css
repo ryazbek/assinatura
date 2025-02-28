@@ -32,8 +32,35 @@ p {
     text-decoration: none;
     border-radius: 5px;
     margin-top: 20px;
+    cursor: pointer;
+    border: none;
 }
 
 .button:hover {
     background: #505050;
+}
+
+/* Oculta o tutorial inicialmente */
+#howToContainer {
+    display: none;
+    text-align: left;
+    margin-top: 20px;
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+#howToContainer h2 {
+    font-size: 18px;
+    color: #333;
+}
+
+#howToContainer ol {
+    padding-left: 20px;
+    color: #333;
+}
+
+#howToContainer ol li {
+    margin-bottom: 10px;
 }

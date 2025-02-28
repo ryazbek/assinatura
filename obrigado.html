@@ -5,13 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Obrigado</title>
     <link rel="stylesheet" href="obrigado.css">
+    <script defer src="obrigado.js"></script>
 </head>
 <body>
     <div class="container">
         <h1>Assinatura Enviada!</h1>
-        <p>Sua assinatura foi enviada para o e-mail correspondente.</p>
-        <p>Se não receber, entre em contato com o técnico de TI.</p>
-        <a href="gerador.html" class="button">Voltar</a>
+        <p>Sua assinatura foi enviada para E-Mail.</p>
+        <p>Agora basta adiciona-la às assinaturas do Outlook.</p>
+        <button id="toggleHowTo" class="button">Mostrar Passo a Passo</button>
+        <div id="howToContainer">
+            <h2>Como adicionar sua assinatura no Outlook</h2>
+            <ol>
+                <li>Acesse o e-mail <strong id="userEmailCopy"></strong> e copie a assinatura enviada.</li>
+                <li>Abra o Outlook Classic.</li>
+                <li>Clique em <strong>Arquivo</strong> > <strong>Opções</strong>.</li>
+                <li>No menu lateral, selecione <strong>Email</strong> e clique em <strong>Assinaturas</strong>.</li>
+                <li>Clique em <strong>Nova</strong>, dê um nome para a assinatura e cole o conteúdo copiado.</li>
+                <li>Escolha essa assinatura para novos e-mails e respostas, se desejar.</li>
+                <li>Clique em <strong>OK</strong> para salvar.</li>
+                <li>Pronto! Agora sua assinatura será usada automaticamente nos e-mails.</li>
+            </ol>
+        </div>
+        <a href="gerador.html" class="button">Nova Assinatura</a>
     </div>
+    <p><small>Caso não tenha recebido, entre em contato com o departamento de TI.</small></p>
 </body>
 </html>
