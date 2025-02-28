@@ -40,7 +40,6 @@ p {
     background: #505050;
 }
 
-/* Oculta o tutorial inicialmente */
 #howToContainer {
     display: none;
     text-align: left;
