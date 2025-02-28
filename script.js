@@ -62,7 +62,7 @@ document.addEventListener("DOMContentLoaded", function () {
             nome_html: nome,
             cargo_html: cargo,
             user_html: email,
-            tel_html: celular ? telefone + " | Celular: " + celular : telefone,
+            tel_html: celular ? telefone + " | Celular: " + celular : telefone, // commit novo
             address_html: endereco
         };
 
