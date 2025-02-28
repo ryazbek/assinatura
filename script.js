@@ -62,7 +62,7 @@ document.addEventListener("DOMContentLoaded", function () {
             nome_html: nome,
             cargo_html: cargo,
             user_html: email,
-            tel_html: telefone + "|" + celular,
+            tel_html: celular ? telefone + "|" + celular : telefone,
             address_html: endereco
         };
 
