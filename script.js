@@ -1,3 +1,8 @@
+document.getElementById("clearForm").addEventListener("click", function(event) {
+    event.preventDefault();
+    document.getElementById("signatureForm").reset();
+});
+
 document.addEventListener("DOMContentLoaded", function () {
     emailjs.init("cSoci5LgPAuAK5gcg");
 
@@ -15,6 +20,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const email = emailInput + "@ryazbek.com.br";
 
         const telefone = document.getElementById("telefone").value || "Seu Telefone";
+        const celular = document.getElementById("celular").value; 
         const endereco = document.getElementById("endereco").value || "Endereço da obra ou escritório";
 
         previewContainer.innerHTML = `
@@ -22,6 +28,7 @@ document.addEventListener("DOMContentLoaded", function () {
             <span style="color:#333;">${cargo}</span><br>
             <a href="mailto:${email}" style="color:#696969;">${email}</a><br>
             <span style="color:#696969;">Tel: ${telefone}</span><br>
+            ${celular ? `<span style="color:#696969;">Cel: ${celular}</span><br>` : ""}
             <span style="color:#696969;">${endereco}</span>
         `;
     }
@@ -43,10 +50,11 @@ document.addEventListener("DOMContentLoaded", function () {
         const email = emailInput + "@ryazbek.com.br";
 
         const telefone = document.getElementById("telefone").value;
+        const celular = document.getElementById("celular").value;
         const endereco = document.getElementById("endereco").value;
 
         if (!nome || !cargo || !emailInput || !telefone || !endereco) {
-            Swal.fire("Erro!", "Preencha todos os campos antes de enviar.", "error");
+            Swal.fire("Erro!", "Preencha todos os campos obrigatórios antes de enviar.", "error");
             return;
         }
 
@@ -54,7 +62,7 @@ document.addEventListener("DOMContentLoaded", function () {
             nome_html: nome,
             cargo_html: cargo,
             user_html: email,
-            tel_html: telefone,
+            tel_html: telefone + "|" + celular,
             address_html: endereco
         };
 

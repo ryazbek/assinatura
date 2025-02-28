@@ -71,6 +71,10 @@ input {
     flex: 1;
 }
 
+.input-group input[type="tel"] {
+    width: calc(100% - 10px);
+}
+
 .email-group span {
     background-color: #ddd;
     padding: 8px;
@@ -107,4 +111,21 @@ button {
     margin-top: 10px;
     display: flex;
     justify-content: center;
+}
+
+.clear-form {
+    text-align: right;
+    font-size: 0.9em;
+    margin-top: 5px;
+}
+
+.clear-form a {
+    color: #888;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.clear-form a:hover {
+    color: #007bff;
+    text-decoration: underline;
 }
